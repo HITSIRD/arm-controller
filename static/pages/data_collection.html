@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>数据采集</title>
+  <!-- 引入 layui 样式 -->
+  <link rel="stylesheet" href="//unpkg.com/layui@2.11.2/dist/css/layui.css">
+</head>
+<body>
+  <div class="layui-container" style="margin: 30px auto; text-align: center;">
+
+    <!-- 数据采集卡片 -->
+    <div class="layui-card" style="width: 80%; margin: 20px auto;">
+      <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
+        数据采集
+      </div>
+      <div class="layui-card-body" style="padding: 20px;">
+
+        <!-- 输入框：文件路径 -->
+<div class="layui-form-item">
+  <label class="layui-form-label" style="width: 150px; text-align: right;">文件路径</label>
+  <div class="layui-input-inline" style="width: 450px;">
+    <input type="text" id="data_file_path" class="layui-input" placeholder="输入文件路径" value="home/arm_controller/data/collection/">
+  </div>
+  <!-- 添加时间戳按钮 -->
+  <button type="button" class="layui-btn layui-btn-warm" id="add_timestamp_button" style="margin-left: 10px;">
+    添加时间戳
+  </button>
+</div>
+
+        <!-- 按钮 -->
+        <div class="layui-form-item" style="margin-top: 20px;">
+          <button type="button" class="layui-btn layui-btn-normal" id="start_data_collection">
+            开始采集
+          </button>
+          <button type="button" class="layui-btn layui-btn-danger" id="stop_data_collection" disabled>
+            结束采集
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入 layui 和 jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="//unpkg.com/layui@2.11.2/dist/layui.js"></script>
+  <script>
+  layui.use(['jquery', 'layer'], function () {
+    var $ = layui.$;
+    var layer = layui.layer;
+
+    $('#add_timestamp_button').on('click', function () {
+  const filePath = $('#data_file_path').val(); // 获取当前输入的文件路径
+
+  // 文件路径不能为空
+  if (!filePath) {
+    layer.msg("文件路径不能为空，无法添加时间戳！", {icon: 2});
+    return;
+  }
+
+  // 获取当前时间戳
+  const timestamp = new Date().toISOString().replace(/[-:.T]/g, '').slice(0, 14);
+
+  // 在文件路径中添加时间戳
+  if (filePath.endsWith('/')) {
+    $('#data_file_path').val(filePath + timestamp);
+  } else {
+    $('#data_file_path').val(filePath + timestamp);
+  }
+
+  // 添加成功提示
+  layer.msg('时间戳已添加到文件路径！', {icon: 1});
+});
+
+    // 点击“开始采集”按钮
+    $('#start_data_collection').on('click', function () {
+      const filePath = $('#data_file_path').val();
+
+      // 文件路径不能为空
+      if (!filePath) {
+        layer.msg("文件路径不能为空！", {icon: 2});
+        return;
+      }
+
+      // 模拟后端接口请求
+      $.ajax({
+        url: '/start_data_collection/',
+        type: 'POST',
+        data: { file_path: filePath },
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        success: function (data) {
+          layer.msg("数据采集已开始！", {icon: 1});
+          $('#start_data_collection').attr('disabled', true);  // 禁用开始按钮
+          $('#stop_data_collection').removeAttr('disabled');  // 启用结束按钮
+        },
+        error: function (error) {
+          layer.msg("数据采集失败，请重试！", {icon: 2});
+        }
+      });
+    });
+
+    // 点击“结束采集”按钮
+    $('#stop_data_collection').on('click', function () {
+      // 模拟结束采集请求
+      $.ajax({
+        url: '/stop_data_collection/',
+        type: 'POST',
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        success: function (data) {
+          layer.msg("数据采集已完成！", {icon: 1});
+          $('#start_data_collection').removeAttr('disabled');  // 启用开始按钮
+          $('#stop_data_collection').attr('disabled', true);   // 禁用结束按钮
+        },
+        error: function (error) {
+          layer.msg("数据采集结束失败，请重试！", {icon: 2});
+        }
+      });
+    });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>机械臂采样</title>
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+</head>
+<body>
+<div class="layui-container" style="margin-top: 30px;">
+  <div class="layui-card" style="width: 80%; margin: 0 auto; padding: 20px;">
+    <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
+      末端执行器采样
+    </div>
+ <div class="layui-card-body" style="padding: 20px; text-align: center;">
+
+     <!-- 第一行：末端执行器位姿采样 -->
+<div class="layui-form-item" style="margin-bottom: 20px;">
+
+  <label class="layui-form-label" style="width: 120px; ">位姿采样:</label>
+  <div class="layui-input-inline" style="width: 450px;">
+    <input type="text" id="end_effector_input" class="layui-input"
+           readonly placeholder="采样结果会显示在这里">
+  </div>
+  <button type="button" class="layui-btn layui-btn-primary" id="end_effector_button"
+          style="background-color: #5FB878; color: white;">
+    采样位姿
+  </button>
+  <button type="button" class="layui-btn layui-btn-normal" id="copy_move_to_button"
+          style="background-color: #F56C6C; color: white; margin-left: 10px;">
+    复制为 j_goto
+  </button>
+</div>
+
+    </div>
+  </div>
+<div class="layui-card" style="width: 80%; margin: 0 auto; padding: 20px;">
+    <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
+      轨迹采样
+    </div>
+<div class="layui-card-body" style="padding: 20px; text-align: center;">
+      <!-- 输入框：文件名 -->
+<div class="layui-form-item">
+  <label class="layui-form-label" style="width: 120px;">文件路径：</label>
+  <div class="layui-input-inline" style="width: 300px;">
+    <!-- 输入框的默认值 -->
+    <input type="text" id="file_path" class="layui-input" value="home/arm_controller/data/traj/" placeholder="输入文件路径">
+  </div>
+  <label class="layui-form-label" style="width: auto;">文件名：</label>
+  <div class="layui-input-inline" style="width: 200px;">
+    <!-- 新增文件名输入框 -->
+    <input type="text" id="file_name" class="layui-input" placeholder="输入文件名">
+  </div>
+  <!-- 按钮：增加时间戳 -->
+  <button type="button" class="layui-btn" id="add_timestamp">
+    增加时间戳
+  </button>
+</div>
+
+      <!-- 按钮 -->
+      <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-primary" id="start_trajectory">
+          开始轨迹采集
+        </button>
+        <button type="button" class="layui-btn layui-btn-normal" id="stop_trajectory" disabled>
+          停止轨迹采集
+        </button>
+      </div>
+
+    </div>
+  </div>
+<div class="layui-card" style="width: 80%; margin: 20px auto; padding: 20px;">
+  <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
+    轨迹重播
+  </div>
+  <div class="layui-card-body" style="padding: 20px; text-align: center;">
+
+    <!-- 输入框：重播路径和文件名 -->
+    <div class="layui-form-item">
+      <label class="layui-form-label" style="width: 120px;">文件路径：</label>
+      <div class="layui-input-inline" style="width: 300px;">
+        <!-- 输入框 -->
+        <input type="text" id="replay_file_path" class="layui-input" placeholder="输入文件路径" />
+      </div>
+      <label class="layui-form-label" style="width: auto;">文件名：</label>
+      <div class="layui-input-inline" style="width: 200px;">
+        <input type="text" id="replay_file_name" class="layui-input" placeholder="输入文件名" />
+      </div>
+      <!-- 按钮：复制采样路径和文件名 -->
+      <button type="button" class="layui-btn layui-btn-warm" id="copy_path_name">
+        复制采样路径和文件名
+      </button>
+    </div>
+
+    <!-- 按钮：重播轨迹 -->
+    <div class="layui-form-item">
+      <button type="button" class="layui-btn layui-btn-normal" id="replay_trajectory">
+        重播轨迹
+      </button>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="/static/layui/layui.js"></script>
+<script>
+layui.use(['jquery', 'layer'], function() {
+  var $ = layui.$;
+  var layer = layui.layer;
+
+
+// 增加时间戳的逻辑
+$('#add_timestamp').on('click', function() {
+  const currentFileName = $('#file_name').val(); // 读取当前文件名
+  const timestamp = getTimestamp(); // 获取当前时间戳
+
+  if (!currentFileName) {
+    layer.msg("文件名不能为空！", {icon: 2});
+    return;
+  }
+
+  // 在文件名后追加时间戳
+  const updatedFileName = `${currentFileName}_${timestamp}`;
+  $('#file_name').val(updatedFileName); // 更新文件名输入框内容
+});
+
+  // 获取当前时间戳（格式：YYYYMMDDHHmmss）
+  function getTimestamp() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const day = String(now.getDate()).padStart(2, '0'); // 日期补零
+    const hours = String(now.getHours()).padStart(2, '0'); // 小时补零
+    const minutes = String(now.getMinutes()).padStart(2, '0'); // 分钟补零
+    const seconds = String(now.getSeconds()).padStart(2, '0'); // 秒钟补零
+
+    return `${year}${month}${day}${hours}${minutes}${seconds}`; // 拼接时间戳
+  }
+
+  // 末端执行器采样按钮点击事件
+  $('#end_effector_button').on('click', function() {
+    layer.msg('正在采样，请稍候...', {icon: 16, shade: 0.3, time: 0});
+    $.ajax({
+      url: '/sample/end_effector/',
+      type: 'GET',
+      success: function(data) {
+        layer.closeAll();
+        $('#end_effector_input').val(data.result);  // 显示结果
+        layer.msg('末端执行器采样成功', {icon: 1, time: 1500});
+      },
+      error: function() {
+        layer.msg('采样失败，请检查后端服务。', {icon: 2});
+      }
+    });
+  });
+
+
+  // 复制为 move_to 格式按钮点击事件
+  $('#copy_move_to_button').on('click', function () {
+    const originalPose = $('#end_effector_input').val();  // 获取输入框内容
+
+    if (!originalPose) {
+      layer.msg("采样结果为空，无法复制！", { icon: 2 });
+      return;
+    }
+
+    // 转换为 move_to 格式字符串
+    const moveToFormat = `j_goto = np.array([${originalPose}])`;
+
+    // 创建临时输入控件用于复制
+    const tempInput = document.createElement('textarea');
+    tempInput.value = moveToFormat;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+
+    layer.msg("已复制为 j_goto 格式", { icon: 1 });
+  });
+
+// 点击开始轨迹采集按钮
+$('#start_trajectory').on('click', function() {
+  const filePath = $('#file_path').val(); // 获取文件路径
+  const fileName = $('#file_name').val(); // 获取文件名
+
+  if (!filePath) {
+    layer.msg("文件路径不能为空！", {icon: 2});
+    return;
+  }
+
+  if (!fileName) {
+    layer.msg("文件名不能为空！", {icon: 2});
+    return;
+  }
+
+  $.ajax({
+    url: 'sample/trajectory/start/',
+    type: 'POST',
+    data: { file_path: filePath, file_name: fileName }, // 传递两个参数
+    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+    success: function(data) {
+      layer.msg("轨迹采集开始", {icon: 1});
+      $('#start_trajectory').attr('disabled', true);
+      $('#stop_trajectory').removeAttr('disabled');
+    },
+    error: function(error) {
+      layer.msg("轨迹采集失败，请重试", {icon: 2});
+      console.error(error);
+    }
+  });
+});
+  // 点击停止轨迹采集按钮
+$('#stop_trajectory').on('click', function() {
+  $.ajax({
+    url: 'sample/trajectory/stop/',
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+    success: function(data) {
+      layer.open({
+        title: '采集结果',
+        content: `
+          采集完成，耗时：${data.elapsed_time.toFixed(2)} 秒<br>
+          文件路径: ${data.file_path}<br>
+          文件名: ${data.file_name}<br>
+        `,
+        btn: ['确认'],
+        yes: function(index) {
+          layer.close(index);
+        }
+      });
+
+      $('#start_trajectory').removeAttr('disabled');
+      $('#stop_trajectory').attr('disabled', true);
+    },
+    error: function(error) {
+      layer.msg("停止轨迹采集失败，请重试", {icon: 2});
+      console.error(error);
+    }
+  });
+});
+
+// 复制采样路径和文件名
+  $('#copy_path_name').on('click', function() {
+    const copiedPath = $('#file_path').val();  // 从采样路径获取
+    const copiedName = $('#file_name').val(); // 从采样文件名获取
+
+    if (!copiedPath || !copiedName) {
+      layer.msg("采样路径或文件名为空，无法复制！", {icon: 2});
+      return;
+    }
+
+    // 设置到重播路径输入框
+    $('#replay_file_path').val(copiedPath);
+    $('#replay_file_name').val(copiedName);
+
+    layer.msg("路径和文件名已复制到重播部分", {icon: 1});
+  });
+
+  // 重播轨迹
+  $('#replay_trajectory').on('click', function() {
+    const replayPath = $('#replay_file_path').val();  // 获取路径
+    const replayFileName = $('#replay_file_name').val();  // 获取文件名
+
+    if (!replayPath || !replayFileName) {
+      layer.msg("请输入文件路径和文件名！", {icon: 2});
+      return;
+    }
+
+    $.ajax({
+      url: 'replay/trajectory/',
+      type: 'POST',
+      data: {
+        file_path: replayPath,
+        file_name: replayFileName
+      }, // 传递路径和文件名
+      headers: { "X-CSRFToken": '{{ csrf_token }}' },  // CSRF 令牌
+      success: function(data) {
+        layer.msg("轨迹重播完成", {icon: 1, time: 2000});
+      },
+      error: function(error) {
+        layer.msg("轨迹重播失败，请重试", {icon: 2});
+        console.error(error);
+      }
+    });
+  });
+
+});
+</script>
+</body>
+</html>
