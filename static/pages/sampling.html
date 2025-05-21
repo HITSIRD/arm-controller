@@ -4,59 +4,124 @@
   <meta charset="UTF-8">
   <title>机械臂采样</title>
   <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <style>
+    /* 调整全局样式 */
+    body {
+      background-color: #f5f5f5; /* 淡背景提升对比 */
+      font-family: "Microsoft YaHei", Arial, sans-serif; /* 提高中文兼容性 */
+    }
+    .layui-container {
+      margin-top: 30px;
+    }
+    .layui-card {
+      width: 80%;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .layui-card-header {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      color: #009688; /* 标题绿色 */
+    }
+    .layui-card-body {
+      padding: 20px;
+    }
+    .layui-form-item {
+      display: flex; /* 使用 flex 居中和对齐项目 */
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .layui-form-label {
+      font-weight: bold; /* 标签加粗 */
+      color: #777; /* 标签灰色提升对比度 */
+    }
+    .layui-input-inline {
+      display: flex;
+      flex-shrink: 1;
+    }
+    .layui-input {
+      border-radius: 4px;
+    }
+    .layui-btn {
+      border-radius: 4px; /* 增加按钮圆角 */
+    }
+    .layui-btn-primary {
+      background-color: #f2f2f2 !important;
+      color: #333 !important;
+    }
+    .layui-btn-normal {
+      background-color: #009688 !important;
+      color: white !important;
+    }
+    .layui-btn-warm {
+      background-color: #FFB800 !important;
+      color: white !important;
+    }
+    .layui-btn-danger {
+      background-color: #FF5722 !important;
+      color: white !important;
+    }
+  </style>
 </head>
 <body>
-<div class="layui-container" style="margin-top: 30px;">
-  <div class="layui-card" style="width: 80%; margin: 0 auto; padding: 20px;">
-    <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
-      末端执行器采样
+<div class="layui-container">
+  <!-- 末端执行器采样 -->
+  <div class="layui-card">
+    <div class="layui-card-header">末端执行器采样</div>
+    <div class="layui-card-body">
+
+      <!-- 第一行：末端执行器位姿采样 -->
+      <div class="layui-form-item">
+        <label class="layui-form-label" style="width: 120px;">位姿采样:</label>
+        <div class="layui-input-inline" style="width: 450px;">
+          <input type="text" id="end_effector_input" class="layui-input"
+                 readonly placeholder="采样结果会显示在这里">
+        </div>
+        <button type="button" class="layui-btn layui-btn-primary" id="end_effector_button">
+          采样位姿
+        </button>
+        <button type="button" class="layui-btn layui-btn-normal" id="copy_move_to_button" style="margin-left: 10px;">
+          复制为 j_goto
+        </button>
+      </div>
+
+      <!-- 第二行：保存位姿与查看位姿 -->
+      <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-primary" id="save_pose_button">
+          保存当前位姿
+        </button>
+        <button type="button" class="layui-btn layui-btn-warm" id="view_saved_poses_button">
+          查看已保存位姿
+        </button>
+      </div>
     </div>
- <div class="layui-card-body" style="padding: 20px; text-align: center;">
-
-     <!-- 第一行：末端执行器位姿采样 -->
-<div class="layui-form-item" style="margin-bottom: 20px;">
-
-  <label class="layui-form-label" style="width: 120px; ">位姿采样:</label>
-  <div class="layui-input-inline" style="width: 450px;">
-    <input type="text" id="end_effector_input" class="layui-input"
-           readonly placeholder="采样结果会显示在这里">
   </div>
-  <button type="button" class="layui-btn layui-btn-primary" id="end_effector_button"
-          style="background-color: #5FB878; color: white;">
-    采样位姿
-  </button>
-  <button type="button" class="layui-btn layui-btn-normal" id="copy_move_to_button"
-          style="background-color: #F56C6C; color: white; margin-left: 10px;">
-    复制为 j_goto
-  </button>
-</div>
 
-    </div>
-  </div>
-<div class="layui-card" style="width: 80%; margin: 0 auto; padding: 20px;">
-    <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
-      轨迹采样
-    </div>
-<div class="layui-card-body" style="padding: 20px; text-align: center;">
-      <!-- 输入框：文件名 -->
-<div class="layui-form-item">
-  <label class="layui-form-label" style="width: 120px;">文件路径：</label>
-  <div class="layui-input-inline" style="width: 300px;">
-    <!-- 输入框的默认值 -->
-    <input type="text" id="file_path" class="layui-input" value="home/arm_controller/data/traj/" placeholder="输入文件路径">
-  </div>
-  <label class="layui-form-label" style="width: auto;">文件名：</label>
-  <div class="layui-input-inline" style="width: 200px;">
-    <!-- 新增文件名输入框 -->
-    <input type="text" id="file_name" class="layui-input" placeholder="输入文件名">
-  </div>
-  <!-- 按钮：增加时间戳 -->
-  <button type="button" class="layui-btn" id="add_timestamp">
-    增加时间戳
-  </button>
-</div>
+  <!-- 轨迹采样 -->
+  <div class="layui-card" style="margin-top: 20px;">
+    <div class="layui-card-header">轨迹采样</div>
+    <div class="layui-card-body">
 
-      <!-- 按钮 -->
+      <!-- 输入框：文件路径和文件名 -->
+      <div class="layui-form-item">
+        <label class="layui-form-label" style="width: 120px;">文件路径：</label>
+        <div class="layui-input-inline" style="width: 300px;">
+          <input type="text" id="file_path" class="layui-input" value="home/arm_controller/data/traj/"
+                 placeholder="输入文件路径">
+        </div>
+        <label class="layui-form-label" style="width: auto;">文件名：</label>
+        <div class="layui-input-inline" style="width: 200px;">
+          <input type="text" id="file_name" class="layui-input" placeholder="输入文件名">
+        </div>
+        <button type="button" class="layui-btn layui-btn-warm" id="add_timestamp" style="margin-left: 10px;">
+          增加时间戳
+        </button>
+      </div>
+
+      <!-- 按钮：开始和停止采集 -->
       <div class="layui-form-item">
         <button type="button" class="layui-btn layui-btn-primary" id="start_trajectory">
           开始轨迹采集
@@ -66,40 +131,46 @@
         </button>
       </div>
 
-    </div>
-  </div>
-<div class="layui-card" style="width: 80%; margin: 20px auto; padding: 20px;">
-  <div class="layui-card-header" style="text-align: center; font-size: 22px; font-weight: bold;">
-    轨迹重播
-  </div>
-  <div class="layui-card-body" style="padding: 20px; text-align: center;">
-
-    <!-- 输入框：重播路径和文件名 -->
-    <div class="layui-form-item">
-      <label class="layui-form-label" style="width: 120px;">文件路径：</label>
-      <div class="layui-input-inline" style="width: 300px;">
-        <!-- 输入框 -->
-        <input type="text" id="replay_file_path" class="layui-input" placeholder="输入文件路径" />
+      <!-- 第二行：保存采轨信息与查看已保存轨迹 -->
+      <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-primary" id="save_trajectory_button">
+          保存采轨信息
+        </button>
+        <button type="button" class="layui-btn layui-btn-warm" id="view_saved_trajectories_button">
+          查看已保存轨迹
+        </button>
       </div>
-      <label class="layui-form-label" style="width: auto;">文件名：</label>
-      <div class="layui-input-inline" style="width: 200px;">
-        <input type="text" id="replay_file_name" class="layui-input" placeholder="输入文件名" />
-      </div>
-      <!-- 按钮：复制采样路径和文件名 -->
-      <button type="button" class="layui-btn layui-btn-warm" id="copy_path_name">
-        复制采样路径和文件名
-      </button>
     </div>
-
-    <!-- 按钮：重播轨迹 -->
-    <div class="layui-form-item">
-      <button type="button" class="layui-btn layui-btn-normal" id="replay_trajectory">
-        重播轨迹
-      </button>
-    </div>
-
   </div>
-</div>
+
+  <!-- 轨迹重播 -->
+  <div class="layui-card" style="margin-top: 20px;">
+    <div class="layui-card-header">轨迹重播</div>
+    <div class="layui-card-body">
+
+      <!-- 文件路径和文件名输入 -->
+      <div class="layui-form-item">
+        <label class="layui-form-label" style="width: 120px;">文件路径：</label>
+        <div class="layui-input-inline" style="width: 300px;">
+          <input type="text" id="replay_file_path" class="layui-input" placeholder="输入文件路径" />
+        </div>
+        <label class="layui-form-label" style="width: auto;">文件名：</label>
+        <div class="layui-input-inline" style="width: 200px;">
+          <input type="text" id="replay_file_name" class="layui-input" placeholder="输入文件名" />
+        </div>
+        <button type="button" class="layui-btn layui-btn-warm" id="copy_path_name" style="margin-left: 10px;">
+          复制采样路径和文件名
+        </button>
+      </div>
+
+      <!-- 按钮：轨迹重播 -->
+      <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-normal" id="replay_trajectory">
+          重播轨迹
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="/static/layui/layui.js"></script>
@@ -123,6 +194,18 @@ $('#add_timestamp').on('click', function() {
   const updatedFileName = `${currentFileName}_${timestamp}`;
   $('#file_name').val(updatedFileName); // 更新文件名输入框内容
 });
+    // 获取当前时间戳（格式：YYYY-MM-DD HH:MM:SS）
+  function getFormattedTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const day = String(now.getDate()).padStart(2, '0'); // 日期补零
+    const hours = String(now.getHours()).padStart(2, '0'); // 小时补零
+    const minutes = String(now.getMinutes()).padStart(2, '0'); // 分钟补零
+    const seconds = String(now.getSeconds()).padStart(2, '0'); // 秒钟补零
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
 
   // 获取当前时间戳（格式：YYYYMMDDHHmmss）
   function getTimestamp() {
@@ -284,6 +367,352 @@ $('#stop_trajectory').on('click', function() {
     });
   });
 
+  // 点击保存当前位姿的事件
+$('#save_pose_button').on('click', function() {
+    const currentPose = $('#end_effector_input').val(); // 获取当前位姿
+
+    if (!currentPose) {
+      layer.msg("当前位姿为空，无法保存！", {icon: 2});
+      return;
+    }
+
+    // 弹出保存位姿界面
+    layer.open({
+      type: 1,
+      title: '保存当前位姿',
+      content: `
+        <div style="padding: 20px;">
+          <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 80px;">位姿:</label>
+            <div class="layui-input-inline" style="width: 300px;">
+              <input type="text" id="pose_input" class="layui-input" value="${currentPose}">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 80px;">描述:</label>
+            <div class="layui-input-inline" style="width: 300px;">
+              <input type="text" id="pose_description" class="layui-input" placeholder="输入描述">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 80px;">时间:</label>
+            <div class="layui-input-inline" style="width: 300px;">
+              <input type="text" id="pose_timestamp" class="layui-input" value="${getFormattedTime()}" readonly>
+            </div>
+          </div>
+          <div class="layui-form-item" style="text-align: center;">
+            <button type="button" class="layui-btn" id="submit_save_pose">提交</button>
+            <button type="button" class="layui-btn layui-btn-danger" id="cancel_save_pose">取消</button>
+          </div>
+        </div>
+      `,
+      area: ['500px', '300px'],
+      success: function(layero, index) {
+        // 提交保存位姿事件
+        $('#submit_save_pose').on('click', function() {
+          const pose = $('#pose_input').val();
+          const description = $('#pose_description').val();
+          const timestamp = $('#pose_timestamp').val();
+
+          if (!pose || !description) {
+            layer.msg("位姿和描述不能为空！", {icon: 2});
+            return;
+          }
+
+          // 提交保存请求
+          $.ajax({
+            url: '/save/pose/', // 后端 Django 的保存接口
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              pose: pose,
+              description: description,
+              timestamp: timestamp
+            }),
+            headers: { "X-CSRFToken": '{{ csrf_token }}' }, // CSRF 令牌
+            success: function(data) {
+              layer.msg("位姿保存成功", {icon: 1});
+              layer.close(index); // 关闭弹窗
+            },
+            error: function(error) {
+              layer.msg("位姿保存失败，请检查后端服务。", {icon: 2});
+              console.error(error);
+            }
+          });
+        });
+
+        // 取消保存位姿事件
+        $('#cancel_save_pose').on('click', function() {
+          layer.close(index); // 关闭弹窗
+        });
+      }
+    });
+});
+
+// 点击保存轨迹路径和文件名的按钮
+$('#save_trajectory_button').on('click', function() {
+    const filePath = $('#file_path').val(); // 获取路径
+    const fileName = $('#file_name').val(); // 获取文件名
+
+    if (!filePath || !fileName) {
+        layer.msg("文件路径和文件名不能为空！", {icon: 2});
+        return;
+    }
+
+    // 弹出保存窗口
+    layer.open({
+        type: 1,
+        title: '保存采轨信息',
+        content: `
+            <div style="padding: 20px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 80px;">路径:</label>
+                    <div class="layui-input-inline" style="width: 300px;">
+                        <input type="text" id="traj_path_input" class="layui-input" value="${filePath}" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 80px;">文件名:</label>
+                    <div class="layui-input-inline" style="width: 300px;">
+                        <input type="text" id="traj_file_name_input" class="layui-input" value="${fileName}" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 80px;">描述:</label>
+                    <div class="layui-input-inline" style="width: 300px;">
+                        <input type="text" id="traj_description_input" class="layui-input" placeholder="输入描述">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 80px;">时间:</label>
+                    <div class="layui-input-inline" style="width: 300px;">
+                        <input type="text" id="traj_timestamp_input" class="layui-input" value="${getFormattedTime()}" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item" style="text-align: center;">
+                    <button type="button" class="layui-btn" id="submit_save_trajectory">提交</button>
+                    <button type="button" class="layui-btn layui-btn-danger" id="cancel_save_trajectory">取消</button>
+                </div>
+            </div>
+        `,
+        area: ['500px', '400px'],
+        success: function(layero, index) {
+            // 提交保存轨迹按钮
+            $('#submit_save_trajectory').on('click', function() {
+                const path = $('#traj_path_input').val();  // 路径
+                const fileName = $('#traj_file_name_input').val();  // 文件名
+                const description = $('#traj_description_input').val();  // 描述
+                const timestamp = $('#traj_timestamp_input').val();  // 时间戳
+
+                if (!path || !fileName) {
+                    layer.msg("路径和文件名不能为空！", {icon: 2});
+                    return;
+                }
+
+                // 发起保存请求
+                $.ajax({
+                    url: '/save/trajectory/',  // 对应的后端轨迹保存接口
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        path: path,
+                        file_name: fileName,
+                        description: description,
+                        timestamp: timestamp
+                    }),
+                    headers: { "X-CSRFToken": '{{ csrf_token }}' },  // Django CSRF 令牌
+                    success: function() {
+                        layer.msg("轨迹保存成功", {icon: 1});
+                        layer.close(index);  // 关闭弹窗
+                    },
+                    error: function(error) {
+                        layer.msg("轨迹保存失败，请检查后端服务", {icon: 2});
+                        console.error(error);
+                    }
+                });
+            });
+
+            // 取消保存按钮
+            $('#cancel_save_trajectory').on('click', function() {
+                layer.close(index);  // 关闭弹窗
+            });
+        }
+    });
+});
+
+// 点击查看已保存轨迹的按钮
+$('#view_saved_trajectories_button').on('click', function() {
+  // 请求后端获取保存的轨迹列表
+  $.ajax({
+    url: '/get/saved_trajectories/', // 对应后端获取轨迹列表的接口
+    type: 'GET',
+    success: function(data) {
+      const trajectories = data.trajectories || []; // 获取轨迹列表
+      if (trajectories.length === 0) {
+        layer.msg("暂无已保存轨迹", {icon: 0});
+        return;
+      }
+
+      // 构造表格内容
+      let content = `
+        <table class="layui-table" lay-size="sm" style="margin: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 10%; text-align: center;">#</th>
+              <th style="min-width: 30%; text-align: center;">路径</th>
+              <th style="min-width: 20%; text-align: center;">文件名</th>
+              <th style="min-width: 20%; text-align: center;">描述</th>
+              <th style="width: 20%; text-align: center;">时间</th>
+              <th style="width: 10%; text-align: center;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      trajectories.forEach((trajectory, index) => {
+        content += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${trajectory.path}</td>
+            <td>${trajectory.file_name}</td>
+            <td>${trajectory.description || '无描述'}</td>
+            <td style="text-align: center;">${trajectory.timestamp}</td>
+            <td style="text-align: center;">
+              <button type="button" class="layui-btn layui-btn-xs layui-btn-normal copy-replay-btn"
+                data-path="${trajectory.path}"
+                data-name="${trajectory.file_name}">
+                复制
+              </button>
+            </td>
+          </tr>`;
+      });
+
+      content += `
+          </tbody>
+        </table>`;
+
+      // 弹出层展示表格
+      layer.open({
+        type: 1,
+        title: '已保存轨迹',
+        content: content,
+        area: ['auto', 'auto'], // 自动宽高
+        maxHeight: '90%', // 表格过多时限制高度并滚动
+        scrollbar: true,
+        success: function() {
+          // 绑定所有 "复制到重播输入" 的点击事件
+          $('.copy-replay-btn').on('click', function() {
+            const path = $(this).data('path');
+            const name = $(this).data('name');
+
+            if (!path || !name) {
+              layer.msg("路径或文件名为空，无法复制！", {icon: 2});
+              return;
+            }
+
+            // 复制到剪贴板
+            const tempInput = document.createElement('textarea');
+            tempInput.value = `路径: ${path}\n文件名: ${name}`;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            layer.msg("路径和文件名已复制到剪贴板！", {icon: 1});
+          });
+        }
+      });
+    },
+    error: function() {
+      layer.msg("获取轨迹列表失败，请检查后端服务。", {icon: 2});
+    }
+  });
+});
+
+// 查看已保存位姿的按钮点击事件
+$('#view_saved_poses_button').on('click', function() {
+  // 请求后端获取保存的位姿列表
+  $.ajax({
+    url: '/get/saved_poses/', // 后端 Django 的获取接口
+    type: 'GET',
+    success: function(data) {
+      const poses = data.poses || []; // 获取位姿列表
+      if (poses.length === 0) {
+        layer.msg("暂无已保存位姿", {icon: 0});
+        return;
+      }
+
+      // 构造表格 HTML
+      let content = `
+        <table class="layui-table" lay-size="sm" style="margin: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 10%; text-align: center;">#</th>
+              <th style="min-width: 30%; text-align: center;">位姿</th>
+              <th style="min-width: 30%; text-align: center;">描述</th>
+              <th style="width: 20%; text-align: center;">时间</th>
+              <th style="width: 10%; text-align: center;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      poses.forEach((pose, index) => {
+        content += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${pose.pose}</td>
+            <td>${pose.description || '无描述'}</td>
+            <td style="text-align: center;">${pose.timestamp}</td>
+            <td style="text-align: center;">
+              <button type="button" class="layui-btn layui-btn-xs copy-pose-btn"
+                data-pose="${pose.pose}">
+                复制
+              </button>
+            </td>
+          </tr>`;
+      });
+
+      content += `
+          </tbody>
+        </table>`;
+
+      // 弹出层展示表格
+      layer.open({
+        type: 1,
+        title: '已保存位姿',
+        content: content,
+        area: ['auto', 'auto'],
+        maxHeight: '90%', // 表格过多时添加滚动条
+        scrollbar: true,
+        success: function() {
+          // 绑定所有“复制位姿到剪切板”按钮的点击事件
+          $('.copy-pose-btn').on('click', function() {
+            const pose = $(this).data('pose'); // 获取位姿
+
+            if (!pose) {
+              layer.msg("位姿为空，无法复制！", {icon: 2});
+              return;
+            }
+
+            // 将位姿复制到剪贴板
+            const tempInput = document.createElement('textarea');
+            tempInput.value = pose;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            layer.msg("位姿已复制到剪贴板！", {icon: 1});
+          });
+        }
+      });
+    },
+    error: function() {
+      layer.msg("获取保存的位姿失败，请检查后端服务。", {icon: 2});
+    }
+  });
+});
 });
 </script>
 </body>

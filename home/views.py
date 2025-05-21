@@ -1,3 +1,5 @@
+import json
+import os
 import time
 
 import panda_py
@@ -5,7 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from home.arm_controller.configs.config import ARM_URL
+from home.arm_controller.configs.config import ARM_URL, SAVE_FILE_PATH, TRAJECTORY_FILE_PATH
 from home.arm_controller.src.controllers.camera import Camera
 from home.arm_controller.src.controllers.data_recorder import DataRecorder
 from home.arm_controller.src.logger.traj_logger import TrajectoryLogger
@@ -150,3 +152,102 @@ def stop_data_collection_view(request):
         return JsonResponse({'status': 'success', 'message': 'Recording stopped and saved.'})
     else:
         return JsonResponse({'status': 'error', 'message': 'No active recorder.'})
+
+@csrf_exempt
+def save_pose(request):
+    if request.method == 'POST':
+        # 解析用户提交的 JSON 数据
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            pose = data.get('pose')
+            description = data.get('description')
+            timestamp = data.get('timestamp')
+        except (json.JSONDecodeError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid input data'}, status=400)
+
+        # 尝试读取现有的 JSON 文件，如果文件不存在或损坏，初始化为空列表
+        saved_poses = []
+        if os.path.exists(SAVE_FILE_PATH):  # 检查文件是否存在
+            try:
+                with open(SAVE_FILE_PATH, 'r') as f:
+                    saved_poses = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):  # 文件为空或损坏
+                saved_poses = []
+
+        # 添加新的数据到列表
+        saved_poses.append({
+            'pose': pose,
+            'description': description,
+            'timestamp': timestamp,
+        })
+
+        # 将数据写回 JSON 文件
+        with open(SAVE_FILE_PATH, 'w') as f:
+            json.dump(saved_poses, f, ensure_ascii=False, indent=4)
+
+        return JsonResponse({'status': 'success'}, status=200)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def get_saved_poses(request):
+    try:
+        with open(SAVE_FILE_PATH, 'r') as f:
+            saved_poses = json.load(f)
+        return JsonResponse({'poses': saved_poses})
+    except FileNotFoundError:
+        return JsonResponse({'poses': []})
+
+@csrf_exempt
+def save_trajectory(request):
+    if request.method == 'POST':
+        # 解析用户提交的 JSON 数据
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            path = data.get('path')  # 文件路径
+            file_name = data.get('file_name')  # 文件名
+            description = data.get('description')  # 描述
+            timestamp = data.get('timestamp')  # 时间戳
+        except (json.JSONDecodeError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid input data'}, status=400)
+
+        # 初始化保存文件数据
+        saved_trajectories = []
+        if os.path.exists(TRAJECTORY_FILE_PATH):  # 检查是否存在轨迹文件
+            try:
+                with open(TRAJECTORY_FILE_PATH, 'r') as file:
+                    saved_trajectories = json.load(file)
+            except (json.JSONDecodeError, FileNotFoundError):  # 文件为空或损坏
+                saved_trajectories = []
+
+        # 添加新的轨迹条目到保存列表
+        saved_trajectories.append({
+            'path': path,
+            'file_name': file_name,
+            'description': description,
+            'timestamp': timestamp,
+        })
+
+        # 保存文件
+        with open(TRAJECTORY_FILE_PATH, 'w') as file:
+            json.dump(saved_trajectories, file, ensure_ascii=False, indent=4)
+
+        return JsonResponse({'status': 'success'}, status=200)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def get_saved_trajectories(request):
+    if request.method == 'GET':
+        # 初始化轨迹列表
+        saved_trajectories = []
+        if os.path.exists(TRAJECTORY_FILE_PATH):  # 检查轨迹文件是否存在
+            try:
+                with open(TRAJECTORY_FILE_PATH, 'r') as file:
+                    saved_trajectories = json.load(file)
+            except (json.JSONDecodeError, FileNotFoundError):  # 文件为空或损坏
+                saved_trajectories = []
+
+        return JsonResponse({'status': 'success', 'trajectories': saved_trajectories}, status=200)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

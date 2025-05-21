@@ -13,4 +13,16 @@ urlpatterns = [
     path('start_data_collection/', views.start_data_collection_view, name='start_data_collection'),
 
     path('stop_data_collection/', views.stop_data_collection_view, name='stop_data_collection'),
+
+    # 保存位姿接口
+    path('save/pose/', views.save_pose, name='save_pose'),
+
+    # 获取已保存位姿接口
+    path('get/saved_poses/', views.get_saved_poses, name='get_saved_poses'),
+
+    # 保存采轨信息接口
+    path('save/trajectory/', views.save_trajectory, name='save_trajectory'),
+
+    # 查看已保存轨迹接口
+    path('get/saved_trajectories/', views.get_saved_trajectories, name='get_saved_trajectories'),
 ]
