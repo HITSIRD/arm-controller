@@ -26,9 +26,14 @@
       <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
         <i class="layui-icon layui-icon-spread-left"></i>
       </li>
+
+{#  <li class="layui-nav-item"><a href="/static/pages/sampling.html">机械臂采样</a></li>#}
+{#  <li class="layui-nav-item"><a href="/static/pages/testing.html">机械臂测试</a></li>#}
+
   <li class="layui-nav-item"><a href="javascript:;" data-url="/static/pages/sampling.html">机械臂采样</a></li>
       <li class="layui-nav-item"><a href="javascript:;" data-url="/static/pages/testing.html">机械臂测试</a></li>
-      <li class="layui-nav-item"><a href="javascript:;" data-url="/static/pages/data_collection.html">数据采集</a></li>
+        <li class="layui-nav-item"><a href="/static/pages/data_collection.html">数据采集</a></li>
+{#      <li class="layui-nav-item"><a href="javascript:;" data-url="/static/pages/data_collection.html">数据采集</a></li>#}
 {#      <li class="layui-nav-item">#}
 {#        <a href="javascript:;">nav groups</a>#}
 {#        <dl class="layui-nav-child">#}
@@ -137,10 +142,33 @@ layui.use(['element', 'layer', 'util'], function(){
     if (url) {
       // 使用 Ajax 加载对应页面
       $('#page-content').load(url, function(response, status, xhr) {
-        if (status == "error") {
-          layer.msg('加载失败，请检查页面是否存在', {icon: 2});
-        }
-      });
+
+        if (status === "success") {
+        // 动态加载页面完成后，手动初始化 layui 模块
+        layui.use(['table', 'layer', 'form'], function() {
+          var table = layui.table;
+          var layer = layui.layer;
+          var form = layui.form;
+
+          // 初始化事件绑定逻辑（根据新加载的页面内容绑定事件）
+          table.on('tool(skill_tree_table)', function(obj) {
+            console.log(`工具栏事件触发: ${obj.event}`, obj.data);
+
+            if (obj.event === 'add_suboperation') {
+              // 添加子操作逻辑
+              layer.msg('添加子操作事件触发', {icon: 1});
+            }
+          });
+
+          // 其他业务逻辑，如按钮点击事件等继续绑定
+          $('#add_skill_button').on('click', function() {
+            layer.msg('添加技能按钮被点击');
+          });
+        });
+      } else if (status === "error") {
+        layer.msg('加载失败，请检查页面是否存在', { icon: 2 });
+      }
+    });
     }
   });
   //头部事件

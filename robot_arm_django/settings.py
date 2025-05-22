@@ -125,3 +125,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static']  # 静态文件目录
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

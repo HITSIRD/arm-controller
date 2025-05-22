@@ -7,9 +7,10 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from home.arm_controller.configs.config import ARM_URL, SAVE_FILE_PATH, TRAJECTORY_FILE_PATH
+from home.arm_controller.configs.config import ARM_URL, SAVE_FILE_PATH, TRAJECTORY_FILE_PATH, GRIPPER_STATE_FILE_PATH
 from home.arm_controller.src.controllers.camera import Camera
 from home.arm_controller.src.controllers.data_recorder import DataRecorder
+from home.arm_controller.src.controllers.hand_controller import HandController
 from home.arm_controller.src.logger.traj_logger import TrajectoryLogger
 from home.arm_controller.src.replay.replay import Replay
 from home.arm_controller.src.sampler.sampler import Sampler
@@ -30,6 +31,7 @@ recorder = None
 arm = panda_py.Panda(ARM_URL)
 gripper = panda_py.libfranka.Gripper(ARM_URL)
 camera = Camera()
+hand_controller = HandController(gripper)
 
 def index(request):
     return render(request, 'home/index.html')  # 渲染模板文件
@@ -39,6 +41,15 @@ def index(request):
 def sample_end_effector(request):
     sample = Sampler(arm, None)
     return JsonResponse({"result": sample.sample_pos()})  # 返回 JSON 数据
+
+# 夹爪的功能函数（获取夹爪宽度数据）
+def sample_gripper_state(request):
+    #sample = Sampler(arm, None)
+    hand_controller = HandController(gripper)
+    return JsonResponse({"result": hand_controller.read_width()})  # 返回 JSON 数据
+
+
+
 
 # 模拟轨迹采样的功能函数
 def sample_trajectory(request):
@@ -249,5 +260,111 @@ def get_saved_trajectories(request):
                 saved_trajectories = []
 
         return JsonResponse({'status': 'success', 'trajectories': saved_trajectories}, status=200)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def save_gripper_state(request):
+    if request.method == 'POST':
+        try:
+            # 从 POST 请求的请求体中解析 JSON 数据
+            data = json.loads(request.body.decode('utf-8'))
+            state = data.get('state')  # 夹爪状态
+            description = data.get('description')  # 夹爪状态描述
+            timestamp = data.get('timestamp')  # 时间戳
+        except (json.JSONDecodeError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid input data'}, status=400)
+
+        # 尝试读取现有的 JSON 文件，如果文件不存在或损坏，初始化为空列表
+        saved_states = []
+        if os.path.exists(GRIPPER_STATE_FILE_PATH):
+            try:
+                with open(GRIPPER_STATE_FILE_PATH, 'r') as f:
+                    saved_states = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):  # 文件为空或损坏
+                saved_states = []
+
+        # 添加新的夹爪状态到列表
+        saved_states.append({
+            'state': state,  # 夹爪状态
+            'description': description,  # 描述
+            'timestamp': timestamp,  # 时间戳
+        })
+
+        # 将数据写回到 JSON 文件
+        with open(GRIPPER_STATE_FILE_PATH, 'w') as f:
+            json.dump(saved_states, f, ensure_ascii=False, indent=4)
+
+        return JsonResponse({'status': 'success'}, status=200)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def get_saved_gripper_states(request):
+    try:
+        # 尝试从文件中读取保存的夹爪状态
+        with open(GRIPPER_STATE_FILE_PATH, 'r') as f:
+            saved_states = json.load(f)  # 读取 JSON 数据
+        return JsonResponse({'states': saved_states})
+    except FileNotFoundError:
+        # 如果文件不存在，则返回空列表
+        return JsonResponse({'states': []})
+
+@csrf_exempt
+def move_gripper(request):
+    """
+    移动夹爪接口
+    POST 参数: { "width": float, "speed": float }
+    """
+    if request.method == 'POST':
+        try:
+            # 解析请求体的 JSON 数据
+            data = json.loads(request.body.decode('utf-8'))
+            width = float(data.get('width'))  # 夹爪宽度
+            speed = float(data.get('speed'))  # 移动速度
+        except (json.JSONDecodeError, ValueError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid input data'}, status=400)
+
+        try:
+            # 调用 HandController 的 move_gripper 方法
+            success = hand_controller.move_gripper(width, speed)
+            print(success)
+            if success:
+                return JsonResponse({'status': 'success', 'message': 'Gripper moved successfully.'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Failed to move gripper.'}, status=500)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def grip_gripper(request):
+    """
+    执行夹取操作接口
+    POST 参数: { "width": float, "speed": float, "force": float (可选) }
+    """
+    if request.method == 'POST':
+        try:
+            # 解析请求体的 JSON 数据
+            data = json.loads(request.body.decode('utf-8'))
+            width = float(data.get('width'))  # 夹爪宽度
+            speed = float(data.get('speed'))  # 夹取速度
+            force = float(data.get('force', 10.0))  # 夹取力度，默认为 10.0
+        except (json.JSONDecodeError, ValueError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid input data'}, status=400)
+
+        try:
+            # 调用 HandController 的 grasp 方法
+            success = hand_controller.grasp(width, speed, force)
+            if success:
+                return JsonResponse({'status': 'success', 'message': 'Gripper gripped successfully.'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Failed to grip.'}, status=500)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

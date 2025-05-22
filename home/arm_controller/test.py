@@ -11,6 +11,7 @@ import numpy as np
 from panda_py import libfranka
 
 from configs.config import ARM_URL
+from home.arm_controller.src.controllers.hand_controller import HandController
 from src.logger.traj_logger import TrajectoryLogger
 from src.replay.replay import Replay
 from src.sampler.sampler import Sampler
@@ -18,7 +19,7 @@ from src.sampler.sampler import Sampler
 
 def test_gripper():
     gripper = libfranka.Gripper(ARM_URL)
-    gripper.move(0.07, 0.03)
+    gripper.move(0.08, 0.03)
     gripper.grasp(0.03, 0.03, 10)
     # gripper.move(0, 0.03)
     # output = gripper.read_once()
@@ -28,17 +29,29 @@ def test_gripper():
     # print(output.max_width)
     # print(output.temperature)
 
+def test_hand_controller():
+    hand = libfranka.Gripper(ARM_URL)
+    hand_controller = HandController(hand)
+    hand_controller.release_gripper()
+    print(f"read width: {hand_controller.read_width()}")
+    #hand_controller.grasp(0.03, 0.03, 10)
+    #print(f"read width: {hand_controller.read_width()}")
+
 
 if __name__ == '__main__':
-    arm = panda_py.Panda(ARM_URL)
+    #arm = panda_py.Panda(ARM_URL)
+    # gripper = libfranka.Gripper(ARM_URL)
+    # gripper.move(0.1, 0.03)
+    # gripper.grasp(0.03, 0.03, 10)
     # sample = Sampler(arm)
     # print(f"current pos: {sample.sample_pos()}")
     # data = sample.sample_trajectory()
     # traj_logger = TrajectoryLogger()
     # traj_logger.write(data, "data/traj", "trajectory")
 
-    replay = Replay(arm)
-    replay.replay_trajectory(path='data/traj/trajectory.h5')
+    # replay = Replay(arm)
+    # replay.replay_trajectory(path='data/traj/trajectory.h5')
+    test_hand_controller()
 
 
 def camera_test():

@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),  # 将根路径映射到 index 视图
     path('sample/end_effector/', views.sample_end_effector, name="sample_end_effector"),
+
+    path('sample/gripper/', views.sample_gripper_state, name="sample_gripper"),
     path('sample/trajectory/', views.sample_trajectory, name="sample_trajectory"),
     path('sample/trajectory/start/', views.trajectory_start, name='trajectory_start'),
     path('sample/trajectory/stop/', views.trajectory_stop, name='trajectory_stop'),
@@ -25,4 +27,13 @@ urlpatterns = [
 
     # 查看已保存轨迹接口
     path('get/saved_trajectories/', views.get_saved_trajectories, name='get_saved_trajectories'),
+
+    path('save/gripper_state/', views.save_gripper_state, name='save_gripper_state'),
+    path('get/saved_gripper_states/', views.get_saved_gripper_states, name='get_saved_gripper_states'),
+
+    path('move/gripper/', views.move_gripper, name='move_gripper'),
+
+    path('grip/gripper/', views.grip_gripper, name='grip_gripper'),
+
+
 ]

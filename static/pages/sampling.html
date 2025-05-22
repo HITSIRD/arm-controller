@@ -6,67 +6,74 @@
   <link rel="stylesheet" href="/static/layui/css/layui.css">
     <style>
     /* 调整全局样式 */
-    body {
-      background-color: #f5f5f5; /* 淡背景提升对比 */
-      font-family: "Microsoft YaHei", Arial, sans-serif; /* 提高中文兼容性 */
-    }
-    .layui-container {
-      margin-top: 30px;
-    }
-    .layui-card {
-      width: 80%;
-      margin: 0 auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .layui-card-header {
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-      color: #009688; /* 标题绿色 */
-    }
-    .layui-card-body {
-      padding: 20px;
-    }
-    .layui-form-item {
-      display: flex; /* 使用 flex 居中和对齐项目 */
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .layui-form-label {
-      font-weight: bold; /* 标签加粗 */
-      color: #777; /* 标签灰色提升对比度 */
-    }
-    .layui-input-inline {
-      display: flex;
-      flex-shrink: 1;
-    }
-    .layui-input {
-      border-radius: 4px;
-    }
-    .layui-btn {
-      border-radius: 4px; /* 增加按钮圆角 */
-    }
-    .layui-btn-primary {
-      background-color: #f2f2f2 !important;
-      color: #333 !important;
-    }
-    .layui-btn-normal {
-      background-color: #009688 !important;
-      color: white !important;
-    }
-    .layui-btn-warm {
-      background-color: #FFB800 !important;
-      color: white !important;
-    }
-    .layui-btn-danger {
-      background-color: #FF5722 !important;
-      color: white !important;
-    }
+body {
+  background-color: #f5f5f5; /* 淡背景提升对比 */
+  font-family: "Microsoft YaHei", Arial, sans-serif; /* 提高中文兼容性 */
+}
+.layui-container {
+  margin-top: 30px;
+}
+.layui-card {
+  width: 90%; /* 统一所有card宽度 */
+  margin: 20px auto; /* 上下间距20px */
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 一致阴影效果 */
+  background-color: #ffffff; /* 确保卡片背景为白色 */
+}
+.layui-card-header {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #009688; /* 标题绿色 */
+  margin-bottom: 10px; /* 标题与内容间距 */
+}
+.layui-card-body {
+  padding: 20px; /* 卡片内容统一内边距 */
+}
+.layui-form-item {
+  display: flex; /* 使用 flex 居中和对齐项目 */
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.layui-form-label {
+  font-weight: bold; /* 标签加粗 */
+  color: #777; /* 标签灰色提升对比度 */
+}
+.layui-input-inline {
+  display: flex;
+  flex-shrink: 1;
+}
+.layui-input {
+  border-radius: 4px;
+  width: 100%; /* 保证输入框在弹性布局下填充 */
+}
+.layui-btn {
+  border-radius: 4px; /* 增加按钮圆角 */
+  margin: 5px; /* 统一按钮间距 */
+}
+.layui-btn-primary {
+  background-color: #f2f2f2 !important;
+  color: #333 !important;
+}
+.layui-btn-normal {
+  background-color: #009688 !important;
+  color: white !important;
+}
+.layui-btn-warm {
+  background-color: #FFB800 !important;
+  color: white !important;
+}
+.layui-btn-danger {
+  background-color: #FF5722 !important;
+  color: white !important;
+}
   </style>
 </head>
 <body>
+
+
 <div class="layui-container">
   <!-- 末端执行器采样 -->
   <div class="layui-card">
@@ -171,7 +178,66 @@
       </div>
     </div>
   </div>
+
+<!-- 夹爪采样 -->
+<div class="layui-card" style="margin-top: 20px;">
+  <div class="layui-card-header">夹爪采样</div>
+  <div class="layui-card-body">
+
+    <!-- 第一行：夹爪状态采样 -->
+    <div class="layui-form-item">
+      <label class="layui-form-label" style="width: 120px;">夹爪采样:</label>
+      <div class="layui-input-inline" style="width: 450px;">
+        <input type="text" id="gripper_input" class="layui-input" readonly placeholder="采样结果会显示在这里">
+      </div>
+      <button type="button" class="layui-btn layui-btn-primary" id="gripper_button">
+        采样夹爪状态
+      </button>
+    </div>
+
+    <!-- 第二行：滑块 -->
+    <div class="layui-form-item">
+      <label class="layui-form-label" style="width: 120px;">位置滑块:</label>
+      <div class="layui-input-inline" style="width: 200px; margin-right: 20px;">
+        <input type="range" id="gripper_slider_1" class="layui-input" min="0" max="0.08" step="0.001" value="0.04">
+      </div>
+      <span id="slider_1_value" style="margin-left: 10px;">0.04</span>
+    </div>
+
+    <div class="layui-form-item">
+      <label class="layui-form-label" style="width: 120px;">速度滑块:</label>
+      <div class="layui-input-inline" style="width: 200px; margin-right: 20px;">
+        <input type="range" id="gripper_slider_2" class="layui-input" min="0.01" max="0.05" step="0.001" value="0.03">
+      </div>
+      <span id="slider_2_value" style="margin-left: 10px;">0.03</span>
+    </div>
+
+<!-- 第三行：移动夹爪和夹取 -->
+<div class="layui-form-item">
+  <!-- 移动夹爪按钮 -->
+  <button type="button" class="layui-btn layui-btn-normal" id="move_gripper_button">
+    移动夹爪
+  </button>
+
+  <!-- 新增的夹取按钮 -->
+  <button type="button" class="layui-btn layui-btn-danger" id="grip_button" style="margin-left: 10px;">
+    夹取
+  </button>
 </div>
+
+    <!-- 第四行：保存按钮 -->
+    <div class="layui-form-item">
+      <button type="button" class="layui-btn layui-btn-primary" id="save_gripper_state_button">
+        保存当前夹爪状态
+      </button>
+      <button type="button" class="layui-btn layui-btn-warm" id="view_saved_gripper_states_button">
+        查看已保存的夹爪状态
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
 
 <script src="/static/layui/layui.js"></script>
 <script>
@@ -713,6 +779,287 @@ $('#view_saved_poses_button').on('click', function() {
     }
   });
 });
+
+// 采样夹爪状态按钮点击事件
+$('#gripper_button').on('click', function() {
+  layer.msg('正在采样夹爪状态，请稍候...', { icon: 16, shade: 0.3, time: 0 });
+  $.ajax({
+    url: '/sample/gripper/', // 后端采样夹爪状态的接口
+    type: 'GET',
+    success: function(data) {
+      layer.closeAll();
+      $('#gripper_input').val(data.result); // 将结果填充到输入框
+      layer.msg('夹爪状态采样成功', { icon: 1, time: 1500 });
+    },
+    error: function() {
+      layer.msg('夹爪状态采样失败，请检查后端服务。', { icon: 2 });
+    }
+  });
+});
+
+// 保存夹爪状态按钮点击事件
+$('#save_gripper_state_button').on('click', function() {
+  const currentGripperState = $('#gripper_input').val(); // 获取当前夹爪状态
+
+  if (!currentGripperState) {
+    layer.msg("当前夹爪状态为空，无法保存！", { icon: 2 });
+    return;
+  }
+
+  // 弹出保存夹爪状态界面
+  layer.open({
+    type: 1,
+    title: '保存当前夹爪状态',
+    content: `
+      <div style="padding: 20px;">
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 80px;">状态:</label>
+          <div class="layui-input-inline" style="width: 300px;">
+            <input type="text" id="gripper_state_input" class="layui-input" value="${currentGripperState}" readonly>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 80px;">描述:</label>
+          <div class="layui-input-inline" style="width: 300px;">
+            <input type="text" id="gripper_description" class="layui-input" placeholder="输入描述">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 80px;">时间:</label>
+          <div class="layui-input-inline" style="width: 300px;">
+            <input type="text" id="gripper_timestamp" class="layui-input" value="${getFormattedTime()}" readonly>
+          </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center;">
+          <button type="button" class="layui-btn" id="submit_save_gripper">提交</button>
+          <button type="button" class="layui-btn layui-btn-danger" id="cancel_save_gripper">取消</button>
+        </div>
+      </div>
+    `,
+    area: ['500px', '300px'],
+    success: function(layero, index) {
+      // 提交保存夹爪状态事件
+      $('#submit_save_gripper').on('click', function() {
+        const state = $('#gripper_state_input').val();
+        const description = $('#gripper_description').val();
+        const timestamp = $('#gripper_timestamp').val();
+
+        if (!state || !description) {
+          layer.msg("夹爪状态和描述不能为空！", { icon: 2 });
+          return;
+        }
+
+        // 提交保存请求
+        $.ajax({
+          url: '/save/gripper_state/', // 后端 Django 的保存接口
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            state: state,
+            description: description,
+            timestamp: timestamp
+          }),
+          headers: { "X-CSRFToken": '{{ csrf_token }}' }, // CSRF 令牌
+          success: function(data) {
+            layer.msg("夹爪状态保存成功", { icon: 1 });
+            layer.close(index); // 关闭弹窗
+          },
+          error: function(error) {
+            layer.msg("夹爪状态保存失败，请检查后端服务。", { icon: 2 });
+            console.error(error);
+          }
+        });
+      });
+
+      // 取消保存夹爪状态事件
+      $('#cancel_save_gripper').on('click', function() {
+        layer.close(index); // 关闭弹窗
+      });
+    }
+  });
+});
+
+// 查看已保存夹爪状态按钮点击事件
+$('#view_saved_gripper_states_button').on('click', function() {
+  // 请求后端获取保存的夹爪状态列表
+  $.ajax({
+    url: '/get/saved_gripper_states/', // 后端 Django 的获取接口
+    type: 'GET',
+    success: function(data) {
+      const states = data.states || []; // 获取夹爪状态列表
+      if (states.length === 0) {
+        layer.msg("暂无已保存的夹爪状态", { icon: 0 });
+        return;
+      }
+
+      // 构造表格 HTML
+      let content = `
+        <table class="layui-table" lay-size="sm" style="margin: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 10%; text-align: center;">#</th>
+              <th style="min-width: 30%; text-align: center;">状态</th>
+              <th style="min-width: 30%; text-align: center;">描述</th>
+              <th style="width: 20%; text-align: center;">时间</th>
+              <th style="width: 10%; text-align: center;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      states.forEach((state, index) => {
+        content += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${state.state}</td>
+            <td>${state.description || '无描述'}</td>
+            <td style="text-align: center;">${state.timestamp}</td>
+            <td style="text-align: center;">
+              <button type="button" class="layui-btn layui-btn-xs copy-gripper-btn"
+                data-state="${state.state}">
+                复制
+              </button>
+            </td>
+          </tr>`;
+      });
+
+      content += `
+          </tbody>
+        </table>`;
+
+      // 弹出层展示表格
+      layer.open({
+        type: 1,
+        title: '已保存的夹爪状态',
+        content: content,
+        area: ['auto', 'auto'],
+        maxHeight: '90%', // 表格过多时添加滚动条
+        scrollbar: true,
+        success: function() {
+          // 绑定所有“复制夹爪状态到剪贴板”按钮的点击事件
+          $('.copy-gripper-btn').on('click', function() {
+            const state = $(this).data('state'); // 获取状态
+
+            if (!state) {
+              layer.msg("夹爪状态为空，无法复制！", { icon: 2 });
+              return;
+            }
+
+            // 将状态复制到剪贴板
+            const tempInput = document.createElement('textarea');
+            tempInput.value = state;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            layer.msg("夹爪状态已复制到剪贴板！", { icon: 1 });
+          });
+        }
+      });
+    },
+    error: function() {
+      layer.msg("获取保存的夹爪状态失败，请检查后端服务。", { icon: 2 });
+    }
+  });
+});
+
+// 更新滑块显示值
+$('#gripper_slider_1').on('input', function() {
+  $('#slider_1_value').text(parseFloat($(this).val()).toFixed(3));
+});
+
+$('#gripper_slider_2').on('input', function() {
+  $('#slider_2_value').text(parseFloat($(this).val()).toFixed(3));
+});
+
+// 更新滑块显示值
+$('#gripper_slider_1').on('input', function() {
+  $('#slider_1_value').text(parseFloat($(this).val()).toFixed(3));
+});
+
+$('#gripper_slider_2').on('input', function() {
+  $('#slider_2_value').text(parseFloat($(this).val()).toFixed(3));
+});
+
+// 移动夹爪按钮功能
+$('#move_gripper_button').on('click', function() {
+  const position = parseFloat($('#gripper_slider_1').val()); // 获取位置值
+  const speed = parseFloat($('#gripper_slider_2').val());    // 获取速度值
+
+  // 提示确认
+  layer.confirm(`是否移动夹爪？<br>位置: ${position.toFixed(3)}<br>速度: ${speed.toFixed(3)}`, {
+    icon: 3,
+    title: '确认移动',
+    btn: ['确认', '取消']
+  }, function(index) {
+    // 关闭确认框
+    layer.close(index);
+
+    // 发起请求发送到后端
+    $.ajax({
+      url: '/move/gripper/', // 后端接口
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        width: position,
+        speed: speed
+      }),
+      headers: { "X-CSRFToken": '{{ csrf_token }}' }, // CSRF Token
+      success: function(data) {
+        if (data.status) {
+          layer.msg('夹爪移动成功', { icon: 1 });
+        } else {
+          layer.msg(`移动失败: ${data.message}`, { icon: 2 });
+        }
+      },
+      error: function(error) {
+        layer.msg('夹爪移动失败，请检查后端服务。', { icon: 2 });
+        console.error(error);
+      }
+    });
+  });
+});
+
+// 夹取按钮功能
+$('#grip_button').on('click', function() {
+  const position = parseFloat($('#gripper_slider_1').val()); // 获取位置值
+  const speed = parseFloat($('#gripper_slider_2').val());    // 获取速度值
+
+  // 提示确认
+  layer.confirm(`是否执行夹取动作？<br>夹取位置: ${position.toFixed(3)}<br>速度: ${speed.toFixed(3)}`, {
+    icon: 3,
+    title: '确认夹取',
+    btn: ['确认', '取消']
+  }, function(index) {
+    // 关闭确认框
+    layer.close(index);
+
+    // 发起请求发送到后端
+    $.ajax({
+      url: '/grip/gripper/', // 后端接口，用于执行夹取动作
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        width: position,
+        speed: speed
+      }),
+      headers: { "X-CSRFToken": '{{ csrf_token }}' }, // CSRF Token
+      success: function(data) {
+        if (data.status) {
+          layer.msg('夹取成功', { icon: 1 });
+        } else {
+          layer.msg(`夹取失败: ${data.message}`, { icon: 2 });
+        }
+      },
+      error: function(error) {
+        layer.msg('夹取失败，请检查后端服务。', { icon: 2 });
+        console.error(error);
+      }
+    });
+  });
+});
+
 });
 </script>
 </body>
