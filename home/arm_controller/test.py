@@ -39,7 +39,11 @@ def test_hand_controller():
 
 
 if __name__ == '__main__':
-    #arm = panda_py.Panda(ARM_URL)
+    arm = panda_py.Panda(ARM_URL)
+    #arm.move_to_start()
+    #arm.recover()
+    #print(arm.raise_error())
+    #arm.move_to_start()
     # gripper = libfranka.Gripper(ARM_URL)
     # gripper.move(0.1, 0.03)
     # gripper.grasp(0.03, 0.03, 10)
@@ -51,7 +55,7 @@ if __name__ == '__main__':
 
     # replay = Replay(arm)
     # replay.replay_trajectory(path='data/traj/trajectory.h5')
-    test_hand_controller()
+    #test_hand_controller()
 
 
 def camera_test():

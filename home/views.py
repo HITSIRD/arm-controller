@@ -8,13 +8,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from home.arm_controller.configs.config import ARM_URL, SAVE_FILE_PATH, TRAJECTORY_FILE_PATH, GRIPPER_STATE_FILE_PATH
+from home.arm_controller.src.controllers.arm_controller import ArmController
 from home.arm_controller.src.controllers.camera import Camera
 from home.arm_controller.src.controllers.data_recorder import DataRecorder
 from home.arm_controller.src.controllers.hand_controller import HandController
 from home.arm_controller.src.logger.traj_logger import TrajectoryLogger
 from home.arm_controller.src.replay.replay import Replay
 from home.arm_controller.src.sampler.sampler import Sampler
-
+from home.arm_controller.src.scripts.sub_operation import process_suboperation_data, process_skill_data
 
 # 全局状态，存储采集状态和数据
 trajectory_state = {
@@ -30,9 +31,11 @@ trajectory_state = {
 recorder = None
 arm = panda_py.Panda(ARM_URL)
 gripper = panda_py.libfranka.Gripper(ARM_URL)
-camera = Camera()
-hand_controller = HandController(gripper)
+# camera = Camera()
+camera = None
 
+hand_controller = HandController(gripper)
+arm_controller = ArmController(arm)
 def index(request):
     return render(request, 'home/index.html')  # 渲染模板文件
 
@@ -368,3 +371,51 @@ def grip_gripper(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def execute_skill(request):
+    if request.method == "POST":
+        try:
+            # 解析请求的 JSON 数据
+            body_unicode = request.body.decode('utf-8')
+            body_data = json.loads(body_unicode)
+
+            # 获取类型和数据
+            skill_type = body_data.get('type')  # "skill" 或 "suboperation"
+            current_skill = body_data.get('data')  # 包含完整的技能或子操作数据
+
+            if skill_type == 'skill':
+                # 如果是技能，解析技能数据（包括其子操作）
+                processed_skill = process_skill_data(current_skill, arm, hand_controller)
+                return JsonResponse({
+                    'status': 'success',
+                    'message': '技能执行成功！',
+                    'processed_data': processed_skill  # 返回解析后的技能数据
+                })
+
+            elif skill_type == 'suboperation':
+                # 如果是子操作，只处理自身
+                processed_suboperation = process_suboperation_data(current_skill, arm, hand_controller)
+                return JsonResponse({
+                    'status': 'success',
+                    'message': '子操作执行成功！',
+                    'processed_data': processed_suboperation  # 返回解析后的子操作数据
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': '未知类型，请检查数据！'
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'数据解析失败：{str(e)}'
+            })
+
+    else:
+        return JsonResponse({
+            'status': 'error',
+            'message': '仅支持 POST 请求！'
+        })
+

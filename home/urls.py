@@ -25,6 +25,8 @@ urlpatterns = [
     # 保存采轨信息接口
     path('save/trajectory/', views.save_trajectory, name='save_trajectory'),
 
+
+
     # 查看已保存轨迹接口
     path('get/saved_trajectories/', views.get_saved_trajectories, name='get_saved_trajectories'),
 
@@ -35,5 +37,5 @@ urlpatterns = [
 
     path('grip/gripper/', views.grip_gripper, name='grip_gripper'),
 
-
+    path('execute_skill/', views.execute_skill, name='execute_skill'),
 ]

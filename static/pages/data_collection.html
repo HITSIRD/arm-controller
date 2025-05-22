@@ -221,8 +221,8 @@ body {
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="//unpkg.com/layui@2.11.2/dist/layui.js"></script>
   <script>
-  layui.use(['table', 'layer', 'form', 'jquery'], function() {
-  const table = layui.table;
+layui.use(['treeTable', 'layer', 'form', 'jquery'], function () {
+  const treeTable = layui.treeTable; // 使用 treeTable 模块
   const layer = layui.layer;
   const form = layui.form;
   const $ = layui.$;
@@ -238,24 +238,130 @@ let allSkills = [
   }
 ];
 
+let currentSkillId = null; // 当前选中的技能 ID
 
-  // 顶部功能按钮事件
-  $('#add_skill_button').on('click', function() {
-    // 添加技能逻辑
-    const skillName = prompt('请输入技能名称:');
-    if (skillName) {
-      const newSkill = {
-        id: `skill_${Date.now()}`,
-        name: skillName,
-        description: '',
-        timestamp: (new Date()).toLocaleString(),
-        children: []
-      };
-      allSkills.push(newSkill);
-      // 重新渲染表格
-      table.reload('skill_tree_id', { data: allSkills });
+// 递归函数：通过 ID 查找技能或子操作
+function findSkillById(skillList, skillId) {
+  for (let skill of skillList) {
+    // 如果当前技能匹配 ID，返回该技能
+    if (skill.id === skillId) {
+      return skill;
+    }
+    // 如果有子技能或子操作，递归查找
+    if (skill.children && skill.children.length > 0) {
+      const result = findSkillById(skill.children, skillId);
+      if (result) {
+        return result; // 如果从子节点中找到了结果，则返回
+      }
+    }
+  }
+  return null; // 如果没有找到，返回 null
+}
+
+  // 在 treeTable.reload 之前，为数据手动设置状态
+function updateTreeData(data) {
+  data.forEach(item => {
+    if (item.children && item.children.length > 0) {
+      item.isEnd = false; // 如果有子节点，设为非叶子节点
+        item.isParent = true;
+      updateTreeData(item.children); // 递归处理子节点
+    } else {
+      item.isEnd = true; // 如果没有子节点，则为叶子节点
+        item.isParent = false
+
+        // 如果是子操作且没有设置 type，则自动设置默认值
+      if (!item.type) {
+        item.type = 'unknown'; // 如果不存在 type，设置为 unknown
+      }
     }
   });
+}
+
+// 顶部功能按钮事件：添加技能
+$('#add_skill_button').on('click', function() {
+  // 弹出表单
+  layer.open({
+    type: 1, // 页面层
+    title: '添加技能', // 标题
+    area: ['400px', '400px'], // 宽高度
+    content: `
+      <form id="add_skill_form" class="layui-form" style="padding: 20px;">
+        <div class="layui-form-item">
+          <label class="layui-form-label">技能名称</label>
+          <div class="layui-input-block">
+            <input type="text" id="skill_name" name="name" required lay-verify="required" placeholder="请输入技能名称" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">技能描述</label>
+          <div class="layui-input-block">
+            <textarea id="skill_description" name="description" placeholder="请输入技能描述" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">技能参数</label>
+          <div class="layui-input-block">
+            <input type="text" id="skill_param" name="param" placeholder="请输入相关参数" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button type="button" id="submit_skill_btn" class="layui-btn layui-btn-normal">确定</button>
+            <button type="button" id="cancel_skill_btn" class="layui-btn layui-btn-primary">取消</button>
+          </div>
+        </div>
+      </form>
+    `,
+    success: function(layero, index) {
+      // 绑定表单事件
+
+      // 确定按钮点击事件
+      $('#submit_skill_btn').on('click', function() {
+        const skillName = $('#skill_name').val().trim(); // 获取技能名称
+        const skillDescription = $('#skill_description').val().trim(); // 获取技能描述
+        const skillParam = $('#skill_param').val().trim(); // 获取技能参数
+
+        if (!skillName) {
+          layer.msg('技能名称不能为空！', { icon: 2 });
+          return;
+        }
+
+        // 新的技能对象
+        const newSkill = {
+          id: `skill_${Date.now()}`, // 唯一 ID
+          name: skillName,
+          description: skillDescription,
+          param: skillParam,
+          timestamp: new Date().toLocaleString(),
+          children: [] // 新技能默认为无子节点
+        };
+
+        // 添加到技能数据中
+        allSkills.push(newSkill);
+
+        // 更新技能树状态
+        updateTreeData(allSkills);
+
+        // 重新渲染表格
+        treeTable.reload('skill_tree_id', { data: allSkills });
+
+        // 打印数据
+        console.log(treeTable.getData('skill_tree_id'));
+
+        // 显示提示信息
+        layer.msg('技能添加成功！', { icon: 1 });
+
+        // 关闭弹窗
+        layer.close(index);
+      });
+
+      // 取消按钮点击事件
+      $('#cancel_skill_btn').on('click', function() {
+        layer.close(index); // 关闭弹窗
+      });
+    }
+  });
+});
 
   $('#import_skill_button').on('click', function() {
     // 文件导入技能
@@ -269,7 +375,7 @@ let allSkills = [
         try {
           const importedSkill = JSON.parse(e.target.result);
           allSkills.push(importedSkill);
-          table.reload('skill_tree_id', { data: allSkills });
+          treeTable.reload('skill_tree_id', { data: allSkills });
           layer.msg('技能导入成功', { icon: 1 });
         } catch (err) {
           layer.msg('技能导入失败，请检查文件格式', { icon: 2 });
@@ -282,7 +388,7 @@ let allSkills = [
 
   $('#export_selected_button').on('click', function() {
     // 导出技能逻辑（支持多选导出）
-    const selectedSkills = table.checkStatus('skill_tree_id').data;
+    const selectedSkills = treeTable.checkStatus('skill_tree_id').data;
     if (selectedSkills.length === 0) {
       layer.msg('请选择要导出的技能', { icon: 0 });
       return;
@@ -296,65 +402,212 @@ let allSkills = [
   });
 
 
-
   // 子操作添加模态框逻辑
-  table.on('tool(skill_tree_table)', function(obj) {
+  treeTable.on('tool(skill_tree_table)', function(obj) {
       console.log('工具条事件触发', obj); // 检查 console 输出是否触发
-    const { event, data } = obj;
+    const { event, data, tr } = obj;
     if (event === 'add_suboperation') {
-        console.log('触发添加子操作');
+    console.log('当前技能 ID:', data.id); // 检查是否正确获取技能 ID
+        currentSkillId = data.id;
       // 弹出添加子操作模态框
-      layer.open({
+      // 弹出添加子操作模态框
+    const modalIndex = layer.open({
         type: 1,
         title: '添加子操作',
         content: $('#add_suboperation_modal'),
-        area: ['500px', '400px']
+        area: ['500px', '400px'],
       });
 
       // 设置种类动态表格
       form.on('select(operation_type)', function(selectData) {
         const type = selectData.value;
-        const tableConfig = {
+        const operationTableConfig = {
           elem: '#operation_selection_table',
+          id: 'operation_selection_id',
           data: [], // 根据类型拉取对应的后端数据
           cols: [[]]
         };
 
         if (type === 'pose') {
-          tableConfig.cols[0] = [
+          operationTableConfig.cols= [
+              [
             { type: 'radio' },
             { field: 'pose', title: '位姿' },
               { field: 'description', title: '描述' },
             { field: 'timestamp', title: '采集时间' }
+                  ]
           ];
-          fetchSavedPoses(tableConfig);
+          fetchSavedPoses(operationTableConfig);
         } else if (type === 'trajectory') {
-          tableConfig.cols[0] = [
+          operationTableConfig.cols= [
+              [
             { type: 'radio' },
               { field: 'path', title: '文件路径' },
             { field: 'file_name', title: '轨迹名称' },
               { field: 'description', title: '描述' },
               { field: 'timestamp', title: '采集时间' }
+                  ]
           ];
-          fetchSavedTrajectories(tableConfig);
+          fetchSavedTrajectories(operationTableConfig);
         } else if (type === 'gripper') {
-          tableConfig.cols[0] = [
+          operationTableConfig.cols = [
+              [
             { type: 'radio' },
             { field: 'state', title: '夹爪状态' },
               { field: 'description', title: '描述' },
               { field: 'timestamp', title: '采集时间' }
+                  ]
           ];
-          fetchSavedGripperStates(tableConfig);
+          fetchSavedGripperStates(operationTableConfig);
         }
 
-        table.render(tableConfig);
       });
 
-      $('#add_operation_submit').on('click', function() {
-        // 提交添加子操作逻辑
-      });
+      $('#add_operation_submit').off('click').on('click', function() {
+  const operationType = $('#operation_type').val(); // 获取操作种类
+  const selectedOperation = treeTable.checkStatus('operation_selection_id').data[0]; // 获取选中行
+
+  if (!operationType || !selectedOperation) {
+    layer.msg('请选择操作种类和对应内容', { icon: 2 });
+    return;
+  }
+
+  // 根据当前选中的技能，构造子操作
+  const suboperation = {
+    id: `suboperation_${Date.now()}`, // 唯一 ID
+    pid: currentSkillId,                // 父技能 ID
+    type: operationType,
+    params: selectedOperation, // 保存完整参数到子操作中
+    description: selectedOperation.description || '', // 描述（可能为空）
+    timestamp: selectedOperation.timestamp || '' // 时间戳
+  };
+
+  // 更新 allSkills 数据
+    const parentSkill = allSkills.find(skill => skill.id === currentSkillId);
+
+    if (parentSkill) {
+        if (!parentSkill.children) parentSkill.children = [];
+        parentSkill.children.push(suboperation); // 添加到父节点的 children 中
+
+  }
+    console.log(parentSkill)
+           // 更新树结构数据
+  updateTreeData(allSkills);
+    // 更新 treeTable
+    treeTable.reload('skill_tree_id', { data: allSkills });
+console.log(treeTable.getData('skill_tree_id')); // 输出表格中的完整节点数据
+
+
+  // 关闭弹窗
+  layer.closeAll();
+  layer.msg('子操作添加成功', { icon: 1 });
+});
+
+      $('#add_operation_cancel') // 确保“取消”按钮仅绑定一次
+    .off('click').on('click', function() {
+      layer.close(modalIndex); // 关闭弹窗
+      layer.msg('操作已取消', { icon: 0 });
+    });
     }
+    else if (event === 'delete') {
+    // 判断是技能节点还是子操作节点
+    const isSkillNode = !data.pid; // 如果没有 pid，说明是技能节点，否则是子操作节点
+
+    if (isSkillNode) {
+        // -----------------
+        // 删除技能节点逻辑
+        // -----------------
+        if (data.children && data.children.length > 0) {
+            layer.msg('请先删除该技能的所有子操作后再删除技能！', { icon: 0 });
+            return;
+        }
+
+        layer.confirm('确定删除该技能吗？', { icon: 3, title: '确认删除' }, function (index) {
+            // 从 allSkills 中删除这个技能节点
+            allSkills = allSkills.filter(skill => skill.id !== data.id);
+
+            // 重新加载表格
+            treeTable.reload('skill_tree_id', { data: allSkills });
+
+            layer.close(index);
+            layer.msg('技能已删除！', { icon: 1 });
+        });
+    } else {
+        // -----------------
+        // 删除子操作节点逻辑
+        // -----------------
+
+        layer.confirm('确定删除该子操作吗？', { icon: 3, title: '确认删除' }, function (index) {
+            // 在 allSkills 中找到父技能节点
+            const parentSkill = allSkills.find(skill => skill.id === data.pid);
+
+            if (parentSkill && parentSkill.children) {
+                // 从父技能的 children 中删除子操作
+                parentSkill.children = parentSkill.children.filter(child => child.id !== data.id);
+
+                // 重新加载表格
+                treeTable.reload('skill_tree_id', { data: allSkills });
+
+                layer.msg('子操作已删除！', { icon: 1 });
+            } else {
+                layer.msg('子操作删除失败，找不到父节点！', { icon: 2 });
+            }
+
+            layer.close(index);
+            console.log(treeTable.getData('skill_tree_id')); // 输出表格中的完整节点数据
+        });
+    }
+}
+
+// 执行技能的逻辑
+else if (event === 'execute_skill') {
+  // 获取当前技能或子操作的数据
+  currentSkillId = data.id;
+  const currentSkill = findSkillById(allSkills, currentSkillId); // 在整个技能树中查找对应节点
+
+  if (!currentSkill) {
+    // 如果匹配不到，提示错误
+    layer.msg('未找到对应的技能或子操作数据！', { icon: 2 });
+    return;
+  }
+
+  // 根据 currentSkill 的 isParent 确定类型
+  const payload = {
+    type: currentSkill.isParent ? 'skill' : 'suboperation', // 判断类型
+    data: currentSkill
+  };
+    console.log(payload)
+  // 确认执行技能或子操作
+  layer.confirm(
+    `是否执行该${payload.type === 'skill' ? '技能' : '子操作'}？`,
+    { icon: 3, title: '执行任务' },
+    function (index) {
+      // 执行 AJAX 请求
+      $.ajax({
+        url: '/execute_skill/',
+        type: 'POST',
+        contentType: 'application/json', // 指定 JSON 格式
+        data: JSON.stringify(payload), // 序列化为 JSON 字符串
+        success: function (res) {
+          layer.msg('执行成功！', { icon: 1 });
+        },
+        error: function (err) {
+          layer.msg('执行失败，请检查后端！', { icon: 2 });
+        }
+      });
+
+      layer.close(index); // 关闭确认窗口
+    }
+  );
+}
+  else if (event === 'toggle') {
+  // 切换展开状态
+  treeTable.expandNode('skill_tree_id', {
+    index: obj.tr.data('index'), // 当前节点的索引
+    expandFlag: !obj.data.isOpen // 切换展开或折叠状态
   });
+}
+});
 
   function fetchSavedPoses(config) {
     $.ajax({
@@ -362,7 +615,7 @@ let allSkills = [
       method: 'GET',
       success: function(data) {
         config.data = data.poses || [];
-        table.render(config);
+        treeTable.render(config);
       },
       error: function() {
         layer.msg('位姿数据获取失败', { icon: 2 });
@@ -376,7 +629,7 @@ let allSkills = [
       method: 'GET',
       success: function(data) {
         config.data = data.trajectories || [];
-        table.render(config);
+        treeTable.render(config);
       },
       error: function() {
         layer.msg('轨迹数据获取失败', { icon: 2 });
@@ -390,7 +643,7 @@ let allSkills = [
       method: 'GET',
       success: function(data) {
         config.data = data.states || [];
-        table.render(config);
+        treeTable.render(config);
       },
       error: function() {
         layer.msg('夹爪状态数据获取失败', { icon: 2 });
@@ -399,19 +652,32 @@ let allSkills = [
   }
 
         // 初始化技能树状表格
-  table.render({
-    elem: '#skill_tree_table',
-    id: 'skill_tree_id',
-    data: allSkills,
-    toolbar: true,
-    cols: [[
-      { type: 'numbers', title: '序号' },
-      { field: 'name', title: '技能名称', edit: 'text' },
-      { field: 'description', title: '技能描述', edit: 'text' },
-      { field: 'timestamp', title: '创建时间' },
-      { field: 'actions', title: '操作', toolbar: '#skill_actions_bar' }
-    ]]
-  });
+treeTable.render({
+  elem: '#skill_tree_table',
+  id: 'skill_tree_id',
+  data: allSkills,
+  toolbar: true,
+  isOpenDefault: true,
+  tree: {
+    iconIndex: 1,
+    isPidData: false,
+    idName: 'id',
+    pidName: 'pid',
+    childName: 'children'
+  },
+  cols: [[
+    { type: 'numbers', title: '序号' },
+    { field: 'name', title: '技能名称', edit: 'text', width: 200 },
+    { field: 'type', title: '类别', width: 120, templet: function(d) {
+      // 根据数据是否有父节点（pid），决定类别显示
+      return d.pid ? d.type : 'skill';
+    }},
+    { field: 'description', title: '技能描述', edit: 'text', minWidth: 250 }, // 追加 minWidth
+    { field: 'timestamp', title: '创建时间', width: 180 },
+    { title: '操作', toolbar: '#skill_actions_bar', minWidth: 300 } // 确保工具栏宽度
+  ]]
+});
+
 
       $('#add_timestamp_button').on('click', function () {
   const filePath = $('#data_file_path').val(); // 获取当前输入的文件路径
