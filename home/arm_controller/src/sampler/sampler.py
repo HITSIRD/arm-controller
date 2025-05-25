@@ -11,7 +11,13 @@ class Sampler():
         self.camera = camera
 
     def sample_pos(self):
-        pos = self.arm.q.tolist()
+        self.arm.teaching_mode(True)
+        #print("Teaching mode on")
+        time.sleep(0.01)
+        self.arm.teaching_mode(False)
+        pos = self.arm.get_state().q
+        # pos = self.arm.get_position()
+        # orientation = self.arm.get_orientation()
         print(f"Current arm pos: {pos}")
         return pos
 

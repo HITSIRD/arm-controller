@@ -38,8 +38,15 @@ def test_hand_controller():
     #print(f"read width: {hand_controller.read_width()}")
 
 
-if __name__ == '__main__':
+def test_arm_sampler():
     arm = panda_py.Panda(ARM_URL)
+    print(f"j_goto:{arm.get_state().q}")
+
+    print("position:", arm.get_position())
+    print("orientation:", arm.get_orientation())
+
+if __name__ == '__main__':
+    # arm = panda_py.Panda(ARM_URL)
     #arm.move_to_start()
     #arm.recover()
     #print(arm.raise_error())
@@ -56,7 +63,7 @@ if __name__ == '__main__':
     # replay = Replay(arm)
     # replay.replay_trajectory(path='data/traj/trajectory.h5')
     #test_hand_controller()
-
+    test_arm_sampler()
 
 def camera_test():
     import pyrealsense2 as rs

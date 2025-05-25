@@ -33,9 +33,9 @@ arm = panda_py.Panda(ARM_URL)
 gripper = panda_py.libfranka.Gripper(ARM_URL)
 # camera = Camera()
 camera = None
-
+current_skill = None
 hand_controller = HandController(gripper)
-arm_controller = ArmController(arm)
+#arm_controller = ArmController(arm)
 def index(request):
     return render(request, 'home/index.html')  # 渲染模板文件
 
@@ -52,14 +52,6 @@ def sample_gripper_state(request):
     return JsonResponse({"result": hand_controller.read_width()})  # 返回 JSON 数据
 
 
-
-
-# 模拟轨迹采样的功能函数
-def sample_trajectory(request):
-    result = "轨迹点: (5, 7, 3), (6, 8, 4)"  # 这里是你实际函数返回的采样结果
-    return JsonResponse({"result": result})  # 返回 JSON 数据
-
-
 @csrf_exempt
 def trajectory_start(request):
     """开始轨迹采集"""
@@ -73,7 +65,9 @@ def trajectory_start(request):
 
     # 启动录制逻辑
     arm.teaching_mode(True)
+    print("Teaching mode on")
     arm.enable_logging(100000)
+    print("Enabling logging")
     print("Trajectory start")
     return JsonResponse({"status": "started"})
 
@@ -83,6 +77,7 @@ def trajectory_stop(request):
     """结束轨迹采集"""
     if not trajectory_state["recording"]:
         return JsonResponse({"error": "No active trajectory recording to stop."}, status=400)
+
 
     arm.teaching_mode(False)
     print("Trajectory stopped.")
@@ -120,6 +115,7 @@ def replay_trajectory(request):
 
         try:
             # 实例化 Replay 并执行重播
+
             replay = Replay(arm)
             replay.replay_trajectory(path=full_path)
             return JsonResponse({'message': '轨迹重播成功'}, status=200)
@@ -148,6 +144,7 @@ def start_data_collection_view(request):
     print(save_path)
     # 初始化并启动数据采集器
     try:
+
         recorder = DataRecorder(arm, gripper, camera, save_path=save_path, callback=on_data_saved)
         recorder.start()  # 开始数据采集
         print("Data collection has started.")
@@ -383,7 +380,6 @@ def execute_skill(request):
             # 获取类型和数据
             skill_type = body_data.get('type')  # "skill" 或 "suboperation"
             current_skill = body_data.get('data')  # 包含完整的技能或子操作数据
-
             if skill_type == 'skill':
                 # 如果是技能，解析技能数据（包括其子操作）
                 processed_skill = process_skill_data(current_skill, arm, hand_controller)

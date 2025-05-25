@@ -5,7 +5,8 @@ import numpy as np
 from home.arm_controller.src.replay.replay import Replay
 from home.arm_controller.src.utils.utils import string_to_float_array
 
-def process_skill_data(suboperation_node, arm, hand = None):
+
+def process_skill_data(suboperation_node, arm, hand=None):
     sub_type = suboperation_node.get('type')
     suboperations = suboperation_node.get('children')
     for suboperation in suboperations:
@@ -13,8 +14,10 @@ def process_skill_data(suboperation_node, arm, hand = None):
         time.sleep(1)
     print("Skill data processed")
     return True
+
+
 # 处理子操作数据
-def process_suboperation_data(suboperation_node, arm, hand = None):
+def process_suboperation_data(suboperation_node, arm, hand=None):
     sub_type = suboperation_node.get('type')
     params = suboperation_node.get('params')
     # 根据不同的类型，写逻辑分支

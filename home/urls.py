@@ -6,7 +6,7 @@ urlpatterns = [
     path('sample/end_effector/', views.sample_end_effector, name="sample_end_effector"),
 
     path('sample/gripper/', views.sample_gripper_state, name="sample_gripper"),
-    path('sample/trajectory/', views.sample_trajectory, name="sample_trajectory"),
+
     path('sample/trajectory/start/', views.trajectory_start, name='trajectory_start'),
     path('sample/trajectory/stop/', views.trajectory_stop, name='trajectory_stop'),
 
