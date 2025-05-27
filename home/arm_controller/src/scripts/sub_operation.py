@@ -11,7 +11,7 @@ def process_skill_data(suboperation_node, arm, hand=None):
     suboperations = suboperation_node.get('children')
     for suboperation in suboperations:
         processed_suboperation = process_suboperation_data(suboperation, arm, hand)
-        time.sleep(1)
+        time.sleep(0.5)
     print("Skill data processed")
     return True
 
@@ -20,6 +20,9 @@ def process_skill_data(suboperation_node, arm, hand=None):
 def process_suboperation_data(suboperation_node, arm, hand=None):
     sub_type = suboperation_node.get('type')
     params = suboperation_node.get('params')
+    import home.views
+    home.views.skill_label = suboperation_node.get('description')
+
     # 根据不同的类型，写逻辑分支
     if sub_type == 'pose':
         pos_string = params['pose']

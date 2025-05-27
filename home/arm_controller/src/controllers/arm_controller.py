@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from panda_py import controllers
 
@@ -9,6 +11,9 @@ class ArmController:
         self.arm.move_to_joint_position(joint_position)
 
     def get_pose(self):
+        # self.arm.teaching_mode(True)
+        # time.sleep(0.01)
+        # self.arm.teaching_mode(False)
         return self.arm.get_position(), self.arm.get_orientation()
 
     def get_state(self):

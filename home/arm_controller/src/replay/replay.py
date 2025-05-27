@@ -44,9 +44,10 @@ class Replay:
             i = 0
             while ctx.ok() and i < trajectory_length:
                 # 每一步设置目标位置和速度
-                ctrl.set_control(q[i], dq[i])
+                if i % 20 == 0:
+                    ctrl.set_control(q[i], dq[i])
                 if i % playback_frequency == 0:  # 每秒打印一次状态
-                    print(f"Replaying step {i} / {trajectory_length}.")
+                    print(f"Replaying step {i} / {trajectory_length}")
                 i += 1
 
         print("Replay completed.")
