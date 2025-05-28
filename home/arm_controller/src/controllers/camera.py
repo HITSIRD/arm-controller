@@ -5,7 +5,7 @@ import numpy as np
 
 
 class Camera:
-    def __init__(self, width=640, height=480, fps=30):
+    def __init__(self, width=1280, height=720, fps=30):
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)

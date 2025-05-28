@@ -28,22 +28,12 @@ trajectory_state = {
 }
 
 # Define a global variable for the camera thread
-camera_thread = None
 
-# Initialize the camera thread at the start of the application
-def initialize_camera():
-    global camera_thread
-    if camera_thread is None:
-        camera_thread = CameraThread(width=640, height=480, fps=30)
-        camera_thread.start()
-
-initialize_camera()
 # 模块级全局变量
 recorder = None
 arm = panda_py.Panda(ARM_URL)
 gripper = panda_py.libfranka.Gripper(ARM_URL)
-# camera = Camera()
-camera = None
+camera = Camera()
 frame = None
 current_skill = None
 skill_label = None
@@ -157,7 +147,7 @@ def start_data_collection_view(request):
     print(save_path)
     # 初始化并启动数据采集器
     try:
-        recorder = DataRecorder(arm, gripper, save_path=save_path, callback=on_data_saved)
+        recorder = DataRecorder(arm, gripper, camera, save_path=save_path, callback=on_data_saved)
         recorder.start()  # 开始数据采集
         print("Data collection has started.")
         return JsonResponse({'status': 'success', 'message': 'Data collection started.'})

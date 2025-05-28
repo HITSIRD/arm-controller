@@ -40,11 +40,11 @@ class Replay:
 
         # 创建上下文以控制回放
         with self.arm.create_context(frequency=playback_frequency,
-                                     max_runtime=trajectory_length / playback_frequency) as ctx:
+                                     max_runtime=2 * trajectory_length / playback_frequency) as ctx:
             i = 0
             while ctx.ok() and i < trajectory_length:
                 # 每一步设置目标位置和速度
-                if i % 20 == 0:
+                if i % 10 == 0:
                     ctrl.set_control(q[i], dq[i])
                 if i % playback_frequency == 0:  # 每秒打印一次状态
                     print(f"Replaying step {i} / {trajectory_length}")

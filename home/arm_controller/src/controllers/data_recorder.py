@@ -8,12 +8,12 @@ import numpy as np
 from home.arm_controller.src.controllers.arm_controller import ArmController
 from home.arm_controller.src.controllers.hand_controller import HandController
 
-
 class DataRecorder(threading.Thread):
-    def __init__(self, arm, hand, save_path, save_interval=1 / 10, callback=None):
+    def __init__(self, arm, hand, camera, save_path, save_interval=1 / 10, callback=None):
         super().__init__()
         self.arm = ArmController(arm)
         self.hand = HandController(hand)
+        self.camera = camera
         self.save_path = save_path
         self.save_interval = save_interval
         self.running = threading.Event()
@@ -22,7 +22,7 @@ class DataRecorder(threading.Thread):
         self.pose_data = []
         self.force_data = []
         self.tactile_data = []
-        self.image_obs_data = []
+        self.image_obs_data = np.zeros((1800, self.camera.height, self.camera.width, 3), dtype=np.uint8)
         self.skill_label = []
         self.callback = callback  # Optional callback for when data is saved
         self.frame_count = 0
@@ -41,7 +41,6 @@ class DataRecorder(threading.Thread):
 
             if self.skill is not None:
                 timestamp = time.time()
-                image_obs = home.views.frame if home.views.frame is not None else None
                 # 采集运动学与图像数据
                 position, orientation = self.arm.get_pose()
                 q = self.arm.get_state().q
@@ -52,8 +51,8 @@ class DataRecorder(threading.Thread):
                 # save skill lable
                 self.skill_label.append(self.skill)
                 # print("appended")
-                if image_obs is not None:
-                    self.image_obs_data.append(image_obs)
+                image_obs = self.camera.get_frame()
+                self.image_obs_data[self.frame_count] = image_obs
                 self.frame_count += 1
                 process_time = time.time() - timestamp
                 # 动态调整睡眠时间，确保总间隔接近 save_interval
@@ -77,8 +76,7 @@ class DataRecorder(threading.Thread):
             h5f.create_dataset('pose', data=np.array(self.pose_data))
             h5f.create_dataset('q', data=np.array(self.q_data))
             h5f.create_dataset('skill', data=np.array(self.skill_label, dtype=h5py.string_dtype(encoding='utf-8')))
-            if len(self.image_obs_data) > 0:
-                h5f.create_dataset('rgb', data=np.array(self.image_obs_data))
+            h5f.create_dataset('rgb', data=np.array(self.image_obs_data[:self.frame_count]))
 
         # 若需要：保存力或触觉数据
         # np.save(os.path.join(self.save_path, 'force.npy'), np.array(self.force_data))
